@@ -1,144 +1,50 @@
-/* ============================================================
-   Folio — Themes (Editorial / Soft Glass / Pop Dark)
-   ============================================================ */
-
-/* ---------- Theme A: Editorial ---------- */
+/* Themes */
 [data-theme="editorial"] {
-  --bg: #F2EEE3;
-  --bg-elevated: #FAF7F0;
-  --surface: #FFFFFF;
-  --text: #1A1A1A;
-  --text-muted: #6B6560;
-  --accent: #E8212B;
-  --accent-soft: rgba(232, 33, 43, 0.12);
-  --border: rgba(26,26,26,0.1);
-  --shadow: 0 4px 20px rgba(0,0,0,0.06);
-  --shadow-lg: 0 16px 48px rgba(0,0,0,0.1);
-  --toolbar-bg: rgba(250, 247, 240, 0.94);
-  --reader-bg: #F2EEE3;
-  --card-radius: var(--radius-md);
-  --heading-font: var(--font-serif);
-  --tab-bar-bg: #FAF7F0;
-  --cover-pattern: geometric;
+  --bg: #F2EEE3; --bg-elevated: #FAF7F0; --surface: #FFF;
+  --text: #1A1A1A; --text-muted: #6B6560; --accent: #E8212B;
+  --accent-soft: rgba(232,33,43,0.12); --border: rgba(26,26,26,0.1);
+  --toolbar-bg: rgba(250,247,240,0.94); --reader-bg: #F2EEE3;
+  --tab-bar-bg: rgba(250,247,240,0.96);
+}
+[data-theme="editorial"] .brand .logo-text { font-family: var(--font-serif); font-weight: 900; }
+[data-theme="editorial"] .greeting-text, [data-theme="editorial"] .shelf-title {
+  font-family: var(--font-serif); font-weight: 700;
 }
 
-[data-theme="editorial"] .brand .logo {
-  font-family: var(--font-serif);
-  font-weight: 900;
-  letter-spacing: -0.02em;
-}
-
-[data-theme="editorial"] .shelf-title,
-[data-theme="editorial"] .greeting-text {
-  font-family: var(--font-serif);
-  font-weight: 700;
-}
-
-/* ---------- Theme B: Soft Glass ---------- */
 [data-theme="glass"] {
-  --bg: #F5F0EB;
-  --bg-elevated: rgba(255,255,255,0.7);
-  --surface: rgba(255,255,255,0.85);
-  --text: #2A2420;
-  --text-muted: #8A7E74;
-  --accent: #FF6B6B;
-  --accent-soft: rgba(255,107,107,0.15);
-  --border: rgba(255,255,255,0.5);
-  --shadow: 0 8px 32px rgba(0,0,0,0.06);
-  --shadow-lg: 0 20px 60px rgba(0,0,0,0.1);
-  --toolbar-bg: rgba(255,255,255,0.75);
-  --reader-bg: #F8F4EF;
-  --card-radius: var(--radius-xl);
-  --heading-font: var(--font-sans);
-  --tab-bar-bg: rgba(255,255,255,0.8);
-  --cover-pattern: soft;
-  backdrop-filter: blur(20px);
-  -webkit-backdrop-filter: blur(20px);
+  --bg: #F5F0EB; --bg-elevated: rgba(255,255,255,0.75); --surface: rgba(255,255,255,0.9);
+  --text: #2A2420; --text-muted: #8A7E74; --accent: #FF6B6B;
+  --accent-soft: rgba(255,107,107,0.15); --border: rgba(255,255,255,0.5);
+  --toolbar-bg: rgba(255,255,255,0.8); --reader-bg: #F8F4EF;
+  --tab-bar-bg: rgba(255,255,255,0.9); --card-radius: var(--radius-xl);
 }
-
-[data-theme="glass"] .library-card,
-[data-theme="glass"] .drawer,
-[data-theme="glass"] .panel,
-[data-theme="glass"] .reader-toolbar {
-  backdrop-filter: blur(24px);
-  -webkit-backdrop-filter: blur(24px);
-  background: var(--surface);
-  border: 1px solid var(--border);
-}
-
 [data-theme="glass"] .greeting-text {
   font-weight: 600;
   background: linear-gradient(135deg, #FF6B6B, #FF8E8E);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
+  -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
 }
 
-/* ---------- Theme C: Pop Dark ---------- */
-[data-theme="pop"] {
-  --bg: #0D0D0D;
-  --bg-elevated: #1A1A1A;
-  --surface: #1F1F1F;
-  --text: #FFFFFF;
-  --text-muted: #A0A0A0;
-  --accent: #FF3B5C;
-  --accent-soft: rgba(255,59,92,0.2);
-  --border: rgba(255,255,255,0.08);
-  --shadow: 0 4px 24px rgba(0,0,0,0.4);
-  --shadow-lg: 0 16px 48px rgba(0,0,0,0.5);
-  --toolbar-bg: rgba(20,20,20,0.95);
-  --reader-bg: #111;
-  --card-radius: var(--radius-md);
-  --heading-font: var(--font-sans);
+[data-theme="pop"], [data-theme="dark"] {
+  --bg: #0D0D0D; --bg-elevated: #1A1A1A; --surface: #1F1F1F;
+  --text: #FFFFFF; --text-muted: #A0A0A0; --accent: #FF3B5C;
+  --accent-soft: rgba(255,59,92,0.2); --border: rgba(255,255,255,0.08);
+  --shadow: 0 4px 24px rgba(0,0,0,0.4); --shadow-lg: 0 16px 48px rgba(0,0,0,0.5);
+  --toolbar-bg: rgba(20,20,20,0.95); --reader-bg: #111;
   --tab-bar-bg: #0D0D0D;
-  --cover-pattern: bold;
+}
+[data-theme="pop"] .brand .logo-text, [data-theme="dark"] .brand .logo-text {
+  font-weight: 800; text-transform: uppercase; letter-spacing: 0.04em;
+}
+[data-theme="pop"] .shelf-title, [data-theme="dark"] .shelf-title {
+  text-transform: uppercase; letter-spacing: 0.08em; font-size: 0.75rem;
+  font-weight: 700; color: var(--text-muted);
 }
 
-[data-theme="pop"] body,
-[data-theme="pop"] {
-  background: var(--bg);
-  color: var(--text);
-}
-
-[data-theme="pop"] .brand .logo {
-  font-weight: 800;
-  text-transform: uppercase;
-  letter-spacing: 0.06em;
-  font-size: 1.1rem;
-}
-
-[data-theme="pop"] .shelf-title {
-  text-transform: uppercase;
-  letter-spacing: 0.08em;
-  font-size: 0.75rem;
-  font-weight: 700;
-  color: var(--text-muted);
-}
-
-[data-theme="pop"] .greeting-text {
-  font-weight: 800;
-  text-transform: uppercase;
-  letter-spacing: -0.01em;
-}
-
-[data-theme="pop"] .filter-tabs .tab {
-  text-transform: uppercase;
-  letter-spacing: 0.04em;
-  font-size: 0.7rem;
-  font-weight: 700;
-}
-
-/* Auto dark (overrides when system prefers dark and setting enabled) */
+/* System dark when auto-dark on */
 @media (prefers-color-scheme: dark) {
-  [data-auto-dark="true"]:not([data-theme="pop"]) {
-    --bg: #121212;
-    --bg-elevated: #1E1E1E;
-    --surface: #242424;
-    --text: #F0F0F0;
-    --text-muted: #A8A8A8;
-    --border: rgba(255,255,255,0.1);
-    --toolbar-bg: rgba(30,30,30,0.95);
-    --reader-bg: #121212;
-    --tab-bar-bg: #121212;
+  [data-auto-dark="true"]:not([data-theme="pop"]):not([data-theme="dark"]) {
+    --bg: #121212; --bg-elevated: #1E1E1E; --surface: #242424;
+    --text: #F0F0F0; --text-muted: #A8A8A8; --border: rgba(255,255,255,0.1);
+    --toolbar-bg: rgba(30,30,30,0.95); --reader-bg: #121212; --tab-bar-bg: #121212;
   }
 }

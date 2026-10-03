@@ -50,6 +50,14 @@ async function init() {
   const mangaRTL = await getSetting('mangaRTL', false);
   $('#manga-rtl').checked = mangaRTL;
 
+
+  // Theme color meta
+  const meta = document.querySelector('meta[name="theme-color"]');
+  if (meta) {
+    const t = document.documentElement.dataset.theme;
+    meta.content = (t === 'dark' || t === 'pop') ? '#0D0D0D' : '#F2EEE3';
+  }
+
   // Greeting
   updateGreeting();
 
@@ -324,6 +332,24 @@ function toggleToolbar() {
 
 // ---------- Events ----------
 function bindEvents() {
+
+  // Theme toggle (header)
+  $('#btn-theme-toggle')?.addEventListener('click', async () => {
+    const cur = document.documentElement.dataset.theme || 'editorial';
+    const next = (cur === 'dark' || cur === 'pop') ? 'editorial' : 'dark';
+    document.documentElement.dataset.theme = next;
+    await setSetting('theme', next);
+    $$('.theme-card').forEach(c => c.classList.toggle('active', c.dataset.theme === next));
+    const meta = document.querySelector('meta[name="theme-color"]');
+    if (meta) meta.content = next === 'dark' || next === 'pop' ? '#0D0D0D' : '#F2EEE3';
+    showToast(next === 'dark' || next === 'pop' ? 'Dark mode' : 'Light mode');
+  });
+
+  // FAB import
+  $('#fab-import')?.addEventListener('click', () => {
+    fileInput?.click();
+  });
+
   // Tab bar
   $$('.tab-item').forEach(btn => {
     btn.addEventListener('click', () => {
