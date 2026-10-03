@@ -7,10 +7,10 @@ import {
   clearLibrary, getSetting, setSetting, detectFormat, storageEstimate,
 } from './db.js';
 import { showView } from './router.js';
-import { openPDF, extractPDFCover } from './readers/pdf.js';
-import { openEPUB, extractEPUBCover } from './readers/epub.js';
-import { openDOCX, generateDOCXCover } from './readers/docx.js';
-import { openComic, extractComicCover } from './readers/comic.js';
+import { openPDF, extractPDFCover } from './pdf-reader.js';
+import { openEPUB, extractEPUBCover } from './epub-reader.js';
+import { openDOCX, generateDOCXCover } from './docx-reader.js';
+import { openComic, extractComicCover } from './comic-reader.js';
 
 // ---------- State ----------
 let books = [];

@@ -1,24 +1,24 @@
 /**
- * Folio — Service Worker (app-shell cache)
+ * Folio — Service Worker (app-shell cache) — flat layout
  */
-
 const CACHE = 'folio-v1';
 const SHELL = [
   './',
   './index.html',
-  './css/tokens.css',
-  './css/themes.css',
-  './css/components.css',
-  './js/app.js',
-  './js/db.js',
-  './js/router.js',
-  './js/readers/pdf.js',
-  './js/readers/epub.js',
-  './js/readers/docx.js',
-  './js/readers/comic.js',
+  './tokens.css',
+  './themes.css',
+  './components.css',
+  './app.js',
+  './db.js',
+  './router.js',
+  './pdf-reader.js',
+  './epub-reader.js',
+  './docx-reader.js',
+  './comic-reader.js',
   './manifest.json',
-  './icons/icon-192.png',
-  './icons/icon-512.png',
+  './icon.svg',
+  './icon-192.png',
+  './icon-512.png',
 ];
 
 self.addEventListener('install', (event) => {
@@ -38,13 +38,7 @@ self.addEventListener('activate', (event) => {
 self.addEventListener('fetch', (event) => {
   const { request } = event;
   const url = new URL(request.url);
-
-  // Only same-origin GET
-  if (request.method !== 'GET' || url.origin !== self.location.origin) {
-    return;
-  }
-
-  // Network-first for navigations, cache-first for assets
+  if (request.method !== 'GET' || url.origin !== self.location.origin) return;
   if (request.mode === 'navigate') {
     event.respondWith(
       fetch(request)
@@ -57,12 +51,10 @@ self.addEventListener('fetch', (event) => {
     );
     return;
   }
-
   event.respondWith(
     caches.match(request).then((cached) => {
       if (cached) return cached;
       return fetch(request).then((res) => {
-        // Cache CDN responses optionally (opaque)
         if (res.ok || res.type === 'opaque') {
           const copy = res.clone();
           caches.open(CACHE).then((c) => c.put(request, copy));
