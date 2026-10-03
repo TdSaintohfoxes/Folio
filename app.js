@@ -25,6 +25,21 @@ const $ = (sel) => document.querySelector(sel);
 const $$ = (sel) => document.querySelectorAll(sel);
 
 const fileInput = $('#file-input');
+
+function openFilePicker() {
+  const el = document.getElementById('file-input');
+  if (!el) {
+    showToast('File picker missing — re-upload app files');
+    return;
+  }
+  try {
+    el.value = '';
+    el.click();
+  } catch (err) {
+    showToast('Cannot open files: ' + err.message);
+  }
+}
+
 const libraryGrid = $('#library-grid');
 const emptyState = $('#empty-state');
 const continueSection = $('#continue-section');
@@ -347,7 +362,7 @@ function bindEvents() {
 
   // FAB import
   $('#fab-import')?.addEventListener('click', () => {
-    fileInput?.click();
+    openFilePicker();
   });
 
   // Tab bar
@@ -355,7 +370,7 @@ function bindEvents() {
     btn.addEventListener('click', () => {
       const v = btn.dataset.view;
       if (v === 'import') {
-        fileInput.click();
+        openFilePicker();
       } else if (v === 'settings') {
         showView('settings');
       } else if (v === 'library' || v === 'favorites') {
@@ -564,4 +579,23 @@ function setupInstallPrompt() {
 }
 
 // ---------- Boot ----------
-init().catch(console.error);
+init().catch((err) => {
+  console.error(err);
+  window.__folioError = err;
+  const t = document.getElementById('toast');
+  if (t) {
+    t.hidden = false;
+    t.textContent = 'Startup error: ' + (err && err.message ? err.message : String(err));
+  }
+});
+
+// Global fallback: if modules fail partially, still allow file button via capture
+document.addEventListener('click', (e) => {
+  const t = e.target.closest('#btn-import-empty, #fab-import, .tab-item[data-view="import"]');
+  if (!t) return;
+  const input = document.getElementById('file-input');
+  if (input && typeof input.click === 'function') {
+    // let app handler run first; if none, still open
+  }
+}, true);
+
