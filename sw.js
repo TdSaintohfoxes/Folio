@@ -1,29 +1,21 @@
 /**
- * Folio — Service Worker (app-shell cache) — flat layout
+ * Folio SW — network-first for JS/CSS so updates apply
  */
-const CACHE = 'folio-v1';
+const CACHE = 'folio-v21';
 const SHELL = [
   './',
   './index.html',
   './tokens.css',
   './themes.css',
   './components.css',
-  './app.js',
-  './db.js',
-  './router.js',
-  './pdf-reader.js',
-  './epub-reader.js',
-  './docx-reader.js',
-  './comic-reader.js',
   './manifest.json',
   './icon.svg',
   './icon-192.png',
-  './icon-512.png',
 ];
 
 self.addEventListener('install', (event) => {
   event.waitUntil(
-    caches.open(CACHE).then((cache) => cache.addAll(SHELL)).then(() => self.skipWaiting())
+    caches.open(CACHE).then((c) => c.addAll(SHELL)).then(() => self.skipWaiting())
   );
 });
 
@@ -36,31 +28,30 @@ self.addEventListener('activate', (event) => {
 });
 
 self.addEventListener('fetch', (event) => {
-  const { request } = event;
-  const url = new URL(request.url);
-  if (request.method !== 'GET' || url.origin !== self.location.origin) return;
-  if (request.mode === 'navigate') {
+  const req = event.request;
+  if (req.method !== 'GET') return;
+  const url = new URL(req.url);
+  if (url.origin !== self.location.origin) return;
+
+  // Always network-first for scripts and CSS (avoid stuck broken cache)
+  if (url.pathname.endsWith('.js') || url.pathname.endsWith('.css') || url.pathname.endsWith('.html')) {
     event.respondWith(
-      fetch(request)
-        .then((res) => {
-          const copy = res.clone();
-          caches.open(CACHE).then((c) => c.put(request, copy));
-          return res;
-        })
-        .catch(() => caches.match('./index.html'))
+      fetch(req).then((res) => {
+        const copy = res.clone();
+        caches.open(CACHE).then((c) => c.put(req, copy));
+        return res;
+      }).catch(() => caches.match(req).then((c) => c || caches.match('./index.html')))
     );
     return;
   }
+
   event.respondWith(
-    caches.match(request).then((cached) => {
-      if (cached) return cached;
-      return fetch(request).then((res) => {
-        if (res.ok || res.type === 'opaque') {
-          const copy = res.clone();
-          caches.open(CACHE).then((c) => c.put(request, copy));
-        }
-        return res;
-      }).catch(() => cached);
-    })
+    caches.match(req).then((cached) => cached || fetch(req).then((res) => {
+      if (res.ok) {
+        const copy = res.clone();
+        caches.open(CACHE).then((c) => c.put(req, copy));
+      }
+      return res;
+    }))
   );
 });

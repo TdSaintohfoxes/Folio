@@ -198,6 +198,7 @@ function escapeHtml(str) {
 
 // ---------- Import ----------
 async function importFiles(fileList) {
+  window.__folioImportHandled = true;
   const files = Array.from(fileList);
   if (!files.length) return;
 
@@ -579,6 +580,15 @@ function setupInstallPrompt() {
 }
 
 // ---------- Boot ----------
+window.__folioAppReady = true;
+
+// Process files selected before module load
+if (window.__folioPendingFiles && window.__folioPendingFiles.length) {
+  window.__folioImportHandled = true;
+  importFiles(window.__folioPendingFiles).catch(console.error);
+  window.__folioPendingFiles = null;
+}
+
 init().catch((err) => {
   console.error(err);
   window.__folioError = err;
