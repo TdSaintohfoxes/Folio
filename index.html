@@ -63,17 +63,60 @@ img{max-width:100%;display:block}
 .bar button.on{color:var(--acc)}
 .toast{position:fixed;left:50%;bottom:calc(var(--tab) + var(--sb) + 72px);transform:translateX(-50%) translateY(8px);background:var(--text);color:var(--bg);padding:11px 18px;border-radius:999px;font-size:.88rem;font-weight:500;z-index:200;max-width:88vw;text-align:center;opacity:0;pointer-events:none;transition:.2s}
 .toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
-#reader{display:none;position:fixed;inset:0;z-index:100;background:var(--bg);flex-direction:column}
+#reader{display:none;position:fixed;inset:0;z-index:100;background:#111;flex-direction:column}
 #reader.on{display:flex}
-#rhead{display:flex;align-items:center;gap:8px;padding:8px 10px;padding-top:calc(8px + var(--st));background:var(--elev);border-bottom:1px solid rgba(128,128,128,.12)}
-#rhead b{flex:1;font-size:.9rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-#rbody{flex:1;overflow:auto;-webkit-overflow-scrolling:touch;position:relative}
+#reader.light-reader{background:var(--bg)}
+#rhead{
+  display:flex;align-items:center;gap:6px;
+  padding:6px 8px;padding-top:calc(6px + var(--st));
+  background:rgba(0,0,0,.82);color:#fff;
+  border-bottom:0;position:absolute;left:0;right:0;top:0;z-index:5;
+  transition:transform .25s ease,opacity .25s ease;
+}
+#reader.chrome-hide #rhead{transform:translateY(-110%);opacity:0;pointer-events:none}
+#rhead b{flex:1;font-size:.85rem;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+#rhead .ib{color:#fff}
+#rfoot{
+  position:absolute;left:0;right:0;bottom:0;z-index:5;
+  padding:8px 12px;padding-bottom:calc(8px + var(--sb));
+  background:rgba(0,0,0,.82);color:#fff;
+  display:flex;align-items:center;gap:10px;
+  transition:transform .25s ease,opacity .25s ease;
+}
+#reader.chrome-hide #rfoot{transform:translateY(110%);opacity:0;pointer-events:none}
+#rfoot input[type=range]{flex:1;accent-color:var(--acc)}
+#rpage{font-size:.75rem;font-weight:600;min-width:4.5em;text-align:center;opacity:.9}
+#rbody{
+  flex:1;overflow:auto;-webkit-overflow-scrolling:touch;
+  position:relative;background:#111;overscroll-behavior:contain;
+}
+#reader.light-reader #rbody{background:var(--bg)}
 #rbody iframe{width:100%;height:100%;border:0;min-height:100%}
-#rbody .txt{padding:18px 16px;max-width:640px;margin:0 auto;line-height:1.65;font-size:17px}
+#rbody .txt{
+  padding:20px max(16px,4vw);padding-bottom:calc(80px + var(--sb));
+  max-width:680px;margin:0 auto;line-height:1.7;font-size:1.05rem;
+  color:var(--text);
+}
 #rbody .txt h1,#rbody .txt h2{font-family:Georgia,serif;margin:1.2em 0 .4em}
-#rbody .pages{display:flex;flex-direction:column;align-items:center;gap:8px;padding:8px}
-#rbody .pages img{max-width:100%;height:auto;box-shadow:0 2px 10px rgba(0,0,0,.15)}
-.spin{padding:40px;text-align:center;color:var(--muted)}
+/* Continuous vertical strip — fit width, no gaps (webtoon / PDF strip) */
+#rbody .strip{
+  display:flex;flex-direction:column;align-items:stretch;
+  width:100%;margin:0;padding:0;gap:0;
+}
+#rbody .strip .page{
+  width:100%;margin:0;padding:0;line-height:0;
+  background:#111;
+}
+#rbody .strip .page img,
+#rbody .strip .page canvas{
+  width:100%;height:auto;display:block;
+  vertical-align:top;
+}
+#rbody .strip .page + .page{box-shadow:none}
+.spin{padding:48px 20px;text-align:center;color:#aaa;font-size:.95rem}
+.spin .bar{width:min(200px,60%);height:3px;margin:16px auto 0;background:rgba(255,255,255,.15);border-radius:2px;overflow:hidden}
+.spin .bar i{display:block;height:100%;width:40%;background:var(--acc);border-radius:2px;animation:load 1s ease infinite}
+@keyframes load{0%{transform:translateX(-100%)}100%{transform:translateX(250%)}}
 </style>
 </head>
 <body>
@@ -111,10 +154,14 @@ img{max-width:100%;display:block}
 </nav>
 <div id="reader">
   <div id="rhead">
-    <button type="button" class="ib" id="rClose">←</button>
+    <button type="button" class="ib" id="rClose" title="Back">←</button>
     <b id="rTitle">Reading</b>
   </div>
   <div id="rbody"><div class="spin">Loading…</div></div>
+  <div id="rfoot">
+    <span id="rpage">1 / 1</span>
+    <input type="range" id="rseek" min="1" max="1" value="1" aria-label="Page"/>
+  </div>
 </div>
 <input type="file" id="file" multiple accept="*/*" style="position:fixed;left:-9999px;width:1px;height:1px;opacity:0"/>
 <div class="toast" id="toast"></div>
@@ -270,10 +317,14 @@ function render(){
 }
 
 async function openBook(b){
-  $('#reader').classList.add('on');
+  var r=$('#reader');
+  r.classList.add('on');
+  r.classList.remove('chrome-hide');
+  if(b.format==='pdf'||b.format==='cbz'||b.format==='cbr') r.classList.remove('light-reader');
+  else r.classList.add('light-reader');
   $('#rTitle').textContent=b.title;
   var body=$('#rbody');
-  body.innerHTML='<div class="spin">Loading…</div>';
+  body.innerHTML='<div class="spin">Loading…<div class="bar"><i></i></div></div>';
   try{
     var rec=await idbGet('blobs',b.id);
     if(!rec||!rec.blob) throw new Error('File missing');
@@ -289,35 +340,86 @@ async function openBook(b){
   }
 }
 
+
+function setPageLabel(cur,total){
+  var el=$('#rpage');
+  if(el) el.textContent=cur+' / '+total;
+  var sk=$('#rseek');
+  if(sk){ sk.max=total; sk.value=cur; }
+}
+function setupSeek(total){
+  var sk=$('#rseek');
+  if(!sk) return;
+  sk.min=1; sk.max=Math.max(1,total); sk.value=1;
+  sk.oninput=function(){
+    var n=parseInt(sk.value,10);
+    var el=document.querySelector('#rbody .page[data-page="'+n+'"]');
+    if(el) el.scrollIntoView({behavior:'smooth',block:'start'});
+    setPageLabel(n,total);
+  };
+}
+function watchPages(body,total){
+  var pages=body.querySelectorAll('.page');
+  if(!pages.length||!('IntersectionObserver' in window)) return;
+  var obs=new IntersectionObserver(function(entries){
+    var best=null, bestRatio=0;
+    entries.forEach(function(e){
+      if(e.isIntersecting && e.intersectionRatio>=bestRatio){
+        bestRatio=e.intersectionRatio; best=e.target;
+      }
+    });
+    if(best){
+      var n=parseInt(best.dataset.page,10);
+      setPageLabel(n,total);
+    }
+  },{root:body,threshold:[0.25,0.5,0.75]});
+  pages.forEach(function(p){obs.observe(p)});
+  // tap center toggles chrome
+  body.onclick=function(e){
+    if(e.target.closest('a,button,input')) return;
+    var r=$('#reader');
+    r.classList.toggle('chrome-hide');
+  };
+}
+
 async function showPDF(body,blob){
+  body.innerHTML='<div class="spin">Rendering pages…<div class="bar"><i></i></div></div>';
   if(!window.pdfjsLib){
     var url=URL.createObjectURL(blob);
-    body.innerHTML='<iframe src="'+url+'#toolbar=1" title="PDF"></iframe>';
+    body.innerHTML='<iframe src="'+url+'#view=FitH" title="PDF"></iframe>';
     return;
   }
   pdfjsLib.GlobalWorkerOptions.workerSrc='https://cdn.jsdelivr.net/npm/pdfjs-dist@3.11.174/build/pdf.worker.min.js';
   var data=await blob.arrayBuffer();
   var pdf=await pdfjsLib.getDocument({data:data}).promise;
-  var wrap=document.createElement('div');
-  wrap.className='pages';
+  var strip=document.createElement('div');
+  strip.className='strip';
   body.innerHTML='';
-  body.appendChild(wrap);
-  var max=Math.min(pdf.numPages,40);
-  for(var i=1;i<=max;i++){
+  body.appendChild(strip);
+  var total=pdf.numPages;
+  setupSeek(total);
+  var w=body.clientWidth||window.innerWidth;
+  // continuous vertical: fit width, page after page
+  for(var i=1;i<=total;i++){
     var page=await pdf.getPage(i);
-    var scale=Math.min(1.4, (body.clientWidth-16)/page.getViewport({scale:1}).width);
-    var vp=page.getViewport({scale:scale||1});
+    var base=page.getViewport({scale:1});
+    var scale=w/base.width;
+    var dpr=Math.min(window.devicePixelRatio||1,2);
+    var vp=page.getViewport({scale:scale*dpr});
     var canvas=document.createElement('canvas');
-    canvas.width=vp.width; canvas.height=vp.height;
+    canvas.width=vp.width;
+    canvas.height=vp.height;
+    canvas.style.width='100%';
+    canvas.style.height='auto';
     await page.render({canvasContext:canvas.getContext('2d'),viewport:vp}).promise;
+    var wrap=document.createElement('div');
+    wrap.className='page';
+    wrap.dataset.page=i;
     wrap.appendChild(canvas);
+    strip.appendChild(wrap);
+    if(i===1) setPageLabel(1,total);
   }
-  if(pdf.numPages>40){
-    var more=document.createElement('p');
-    more.className='spin';
-    more.textContent='Showing first 40 of '+pdf.numPages+' pages';
-    wrap.appendChild(more);
-  }
+  watchPages(body,total);
 }
 
 async function showDOCX(body,blob){
@@ -327,23 +429,36 @@ async function showDOCX(body,blob){
 }
 
 async function showComic(body,blob){
+  body.innerHTML='<div class="spin">Loading pages…<div class="bar"><i></i></div></div>';
   if(!window.JSZip) throw new Error('Zip engine not loaded (need network once)');
   var zip=await JSZip.loadAsync(blob);
-  var names=Object.keys(zip.files).filter(function(n){return /\.(jpe?g|png|gif|webp)$/i.test(n)&&!zip.files[n].dir});
-  names.sort(function(a,b){return a.localeCompare(b,undefined,{numeric:true})});
+  var names=Object.keys(zip.files).filter(function(n){
+    return /\.(jpe?g|png|gif|webp)$/i.test(n)&&!zip.files[n].dir&&n.indexOf('__MACOSX')<0;
+  });
+  names.sort(function(a,b){return a.localeCompare(b,undefined,{numeric:true,sensitivity:'base'})});
   if(!names.length) throw new Error('No images in archive');
-  var wrap=document.createElement('div');
-  wrap.className='pages';
+  var strip=document.createElement('div');
+  strip.className='strip';
   body.innerHTML='';
-  body.appendChild(wrap);
-  var max=Math.min(names.length,60);
-  for(var i=0;i<max;i++){
+  body.appendChild(strip);
+  var total=names.length;
+  setupSeek(total);
+  // continuous vertical webtoon-style strip, fit width, no gaps
+  for(var i=0;i<total;i++){
     var bb=await zip.files[names[i]].async('blob');
     var img=document.createElement('img');
-    img.src=URL.createObjectURL(bb);
     img.alt='Page '+(i+1);
+    img.decoding='async';
+    img.loading=i<3?'eager':'lazy';
+    img.src=URL.createObjectURL(bb);
+    var wrap=document.createElement('div');
+    wrap.className='page';
+    wrap.dataset.page=i+1;
     wrap.appendChild(img);
+    strip.appendChild(wrap);
   }
+  setPageLabel(1,total);
+  watchPages(body,total);
 }
 
 async function showEPUB(body,blob){
