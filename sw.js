@@ -1,7 +1,7 @@
 /**
  * Folio SW — network-first for JS/CSS so updates apply
  */
-const CACHE = 'folio-v21';
+const CACHE = 'folio-v22';
 const SHELL = [
   './',
   './index.html',
